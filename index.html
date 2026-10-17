@@ -53,13 +53,13 @@ button.g2{background:var(--bg);color:var(--tx);border:1px solid var(--bd);font-w
 
 <div class="pane" id="p-ast"><div class="c"><h2>➕ دارایی جدید</h2>
 <label>نوع</label><select id="at"></select><label>نام / توضیح (مثلاً سکه امامی، ۱۰۰ دلار)</label><input id="an">
-<div class="r"><div><label>ارزش خرید (تومان)</label><input id="ab" inputmode="numeric" autocomplete="off"></div><div><label>ارزش فعلی (تومان)</label><input id="ac2" inputmode="numeric" autocomplete="off"></div></div>
+<div class="r"><div><label>ارزش خرید (تومان)</label><input id="ab" inputmode="numeric" autocomplete="off"><div class="w" id="abw"></div></div><div><label>ارزش فعلی (تومان)</label><input id="ac2" inputmode="numeric" autocomplete="off"><div class="w" id="acw"></div></div></div>
 <label>تاریخ خرید</label><div id="dt2"></div><button id="aadd">ثبت دارایی</button></div>
 <div class="c" id="as"></div><div class="c"><h2>لیست دارایی‌ها</h2><div id="al"></div></div></div>
 
 <div class="pane" id="p-due"><div class="c"><h2>➕ سررسید جدید (چک، بدهی، طلب)</h2>
 <label>نوع</label><select id="dk"><option value="D">🔴 بدهی / چک پرداختنی</option><option value="R">🟢 طلب / چک دریافتی</option></select>
-<label>عنوان</label><input id="dn"><label>مبلغ (تومان)</label><input id="da" inputmode="numeric" autocomplete="off">
+<label>عنوان</label><input id="dn"><label>مبلغ (تومان)</label><input id="da" inputmode="numeric" autocomplete="off"><div class="w" id="daw"></div>
 <label>تاریخ سررسید</label><div id="dt3"></div><label>چند روز قبل هشدار بدهد؟</label><input id="dr" inputmode="numeric" value="3">
 <button id="dadd">ثبت</button><button id="nt" class="g2">🔔 فعال‌سازی اعلان</button></div>
 <div class="c"><h2>سررسیدها</h2><div id="dl"></div></div></div>
@@ -77,6 +77,7 @@ button.g2{background:var(--bg);color:var(--tx);border:1px solid var(--bd);font-w
 <button id="bio" class="g2">👆 فعال‌سازی اثر انگشت</button><button id="pd" class="g2">حذف قفل</button></div>
 <div class="c"><h2>🏷️ دسته‌ها و آیکن‌ها</h2><div id="cl"></div><div class="r" style="margin-top:8px"><div style="flex:0 0 80px"><select id="ce"></select></div><div><input id="cn" placeholder="نام دسته"></div></div><button id="cadd">افزودن دسته</button></div>
 <div class="c"><h2>💾 پشتیبان‌گیری</h2><button id="exp">دانلود فایل پشتیبان</button><label>بازیابی از فایل</label><input id="imp" type="file" accept=".json"></div></div>
+<div id="ed" style="position:fixed;inset:0;background:#0008;z-index:50;display:none;align-items:center;justify-content:center;padding:20px"><div class="c" style="width:100%;max-width:360px;margin:0"><h2 id="et"></h2><input id="ev" inputmode="numeric" autocomplete="off"><div class="w" id="ew"></div><div class="r"><button id="es">ذخیره</button><button id="ec" class="g2">انصراف</button></div></div></div>
 <div id="toast"></div>
 
 <script>
@@ -107,7 +108,7 @@ const gD=id=>{const m=+$(id+'m').value;return{y:+$(id+'y').value,m,d:Math.min(+$
 ['dt1','dt2','dt3'].forEach(mkD);
 // money inputs
 function money(id,wid){$(id).oninput=e=>{const r=norm(e.target.value).replace(/\D/g,'').slice(0,15);e.target.value=r?Number(r).toLocaleString('fa-IR'):'';if(wid)$(wid).textContent=words(Number(r)||0)}}
-money('amt','aw');money('ab');money('ac2');money('da');
+money('amt','aw');money('ab','abw');money('ac2','acw');money('da','daw');money('ev','ew');
 // tabs
 const tabs=document.querySelectorAll('#nav button');
 tabs.forEach(b=>b.onclick=()=>{tabs.forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.v))});
@@ -133,10 +134,10 @@ const sg=v=>`<b class="${v>=0?'g':'rr'}" dir="ltr">${v<0?'−':''}${fa(Math.abs(
 const kv=(a,b)=>`<div class="kv"><span>${a}</span>${b}</div>`;
 // assets / dues
 $('at').innerHTML=AT.map((a,i)=>`<option value="${i}">${a[0]} ${a[1]}</option>`).join('');
-$('aadd').onclick=()=>{const b=num($('ab').value),c=num($('ac2').value)||b;if(!b)return;S.as.push(Object.assign({id:Date.now()+'',i:+$('at').value,n:$('an').value.trim(),b,c},gD('dt2')));$('an').value=$('ab').value=$('ac2').value='';save();render();toast('ثبت شد ✓')};
-window.eA=id=>{const v=prompt('ارزش فعلی جدید (تومان):');if(v===null)return;const a=S.as.find(x=>x.id===id);a.c=num(v);save();render()};
+$('aadd').onclick=()=>{const b=num($('ab').value),c=num($('ac2').value)||b;if(!b)return;S.as.push(Object.assign({id:Date.now()+'',i:+$('at').value,n:$('an').value.trim(),b,c},gD('dt2')));$('an').value=$('ab').value=$('ac2').value='';$('abw').textContent=$('acw').textContent='';save();render();toast('ثبت شد ✓')};
+window.eA=id=>{const a=S.as.find(x=>x.id===id);$('et').textContent='ارزش فعلی: '+(a.n||AT[a.i][1]);$('ev').value=Number(a.c).toLocaleString('fa-IR');$('ew').textContent=words(a.c);$('ed').style.display='flex';$('es').onclick=()=>{a.c=num($('ev').value);save();render();$('ed').style.display='none';toast('به‌روز شد ✓')}};$('ec').onclick=()=>$('ed').style.display='none';
 window.dA=id=>{if(confirm('حذف شود؟')){S.as=S.as.filter(x=>x.id!==id);save();render()}};
-$('dadd').onclick=()=>{const a=num($('da').value);if(!a)return;S.du.push(Object.assign({id:Date.now()+'',k:$('dk').value,n:$('dn').value.trim()||'سررسید',a,r:num($('dr').value)},gD('dt3')));$('dn').value=$('da').value='';save();render();chk();toast('ثبت شد ✓')};
+$('dadd').onclick=()=>{const a=num($('da').value);if(!a)return;S.du.push(Object.assign({id:Date.now()+'',k:$('dk').value,n:$('dn').value.trim()||'سررسید',a,r:num($('dr').value)},gD('dt3')));$('dn').value=$('da').value='';$('daw').textContent='';save();render();chk();toast('ثبت شد ✓')};
 window.tD=id=>{const d=S.du.find(x=>x.id===id);d.ok=!d.ok;save();render();chk()};
 window.dD=id=>{if(confirm('حذف شود؟')){S.du=S.du.filter(x=>x.id!==id);save();render();chk()}};
 function notify(t,b){try{if(Notification.permission!=='granted')return;if(navigator.serviceWorker&&navigator.serviceWorker.controller)navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body:b,icon:'icon-192.png'}));else new Notification(t,{body:b})}catch(e){}}
